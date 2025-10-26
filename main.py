@@ -2,6 +2,7 @@ import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from openai import OpenAI
+from openai.error import OpenAIError, RateLimitError
 
 # Получаем токены из переменных окружения
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -25,8 +26,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
 
-    # Отправка запроса в OpenAI
     try:
+        # Отправка запроса в OpenAI
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -35,7 +36,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]
         )
         answer = response.choices[0].message.content
-    except Exception as e:
+
+    except RateLimitError:
+        # Ошибка превышения квоты или лимита запросов
+        answer = "❌ Ошибка OpenAI: превышен лимит запросов, попробуйте позже."
+
+    except OpenAIError as e:
+        # Любая другая ошибка OpenAI
         answer = f"❌ Ошибка OpenAI: {e}"
 
     await update.message.reply_text(answer)
@@ -48,5 +55,5 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    # Запуск Polling (без конфликтов)
+    # Запуск Polling
     app.run_polling()
