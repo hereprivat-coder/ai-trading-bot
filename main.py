@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 from openai import OpenAI
 import os
 
-TELEGRAM_TOKEN = os.getenv("8285751565:AAFLHNnE2g5z6MHsrJK1aYspiNlLN91iBm4")
+TELEGRAM_TOKEN = os.getenv("8292826798:AAFWT_o3uaea-Ayx-WuDnHdfmI6dgzfnG5U")
 OPENAI_API_KEY = os.getenv("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")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
