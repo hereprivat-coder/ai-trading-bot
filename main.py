@@ -1,30 +1,23 @@
+import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-from openai import OpenAI
-import os
 
-TELEGRAM_TOKEN = os.getenv("8292826798:AAFWT_o3uaea-Ayx-WuDnHdfmI6dgzfnG5U")
-OPENAI_API_KEY = os.getenv("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")
+# Получаем токен из переменной окружения
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+# Проверка, что токен есть
+if not TELEGRAM_TOKEN:
+    raise ValueError("❌ TELEGRAM_TOKEN не найден! Добавьте его в переменные окружения Render.")
 
+# Минимальная проверка бота
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Привет! 🤖 Я AI-помощник для трейдинга.\nЗадай вопрос — и я помогу!"
-    )
+    await update.message.reply_text("✅ Бот подключен и работает! Пиши что угодно.")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_text = update.message.text
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Ты AI трейдер, объясняй чётко и по делу."},
-            {"role": "user", "content": user_text}
-        ]
-    )
-    await update.message.reply_text(response.choices[0].message.content)
+    await update.message.reply_text(f"Ты написал: {update.message.text}")
 
 if __name__ == "__main__":
+    print("🤖 Бот запущен!")
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
